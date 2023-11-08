@@ -53,16 +53,16 @@ end
 
 # ( Debian 12 debian/bookworm64)
 # ! not supported need workaround for this
-config.vm.define "debian12" do |debian12|
-  debian12.vm.box = "debian/bookworm64"
-  debian12.vm.network "private_network", type: "dhcp"
-  debian12.vm.network "forwarded_port", guest: 443, host: 443
-  debian12.vm.network "forwarded_port", guest: 80, host: 80
-  debian12.vm.network "forwarded_port", guest: 27017, host: 27017
-  debian12.vm.provider "virtualbox" do |vb|
-    vb.memory = 1024  #
-    vb.cpus = 2        
-  end
-end
+#config.vm.define "debian12" do |debian12|
+#  debian12.vm.box = "debian/bookworm64"
+#  debian12.vm.network "private_network", type: "dhcp"
+#  debian12.vm.network "forwarded_port", guest: 443, host: 443
+#  debian12.vm.network "forwarded_port", guest: 80, host: 80
+#  debian12.vm.network "forwarded_port", guest: 27017, host: 27017
+#  debian12.vm.provider "virtualbox" do |vb|
+#    vb.memory = 1024  #
+#    vb.cpus = 2        
+#  end
+#end
 
 end
