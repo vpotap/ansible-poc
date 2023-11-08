@@ -1,8 +1,8 @@
-# POC Node.js Application Deployment with Nginx, PM2, and MongoDB
+# POC Node.js Application Deployment with Ansible
 
 ## Overview
 
-This is a Proof of Concept (POC) project for deploying a production-ready Node.js application using Nginx, PM2, MongoDB, and Node.js. The project uses a single virtual machine (VM) for demonstration purposes, and it has been tested on various Linux distributions. However, Debian 12 is not yet supported, and a workaround is required for its installation.
+This is a Proof of Concept (POC) Ansible project for deploying a production-ready Node.js application using Nginx, PM2, MongoDB, and Node.js. The project uses a single virtual machine (VM) for demonstration purposes, and it has been tested on various Linux distributions. However, Debian 12 is not yet supported, and a workaround is required for its installation.
 
 The project does not aim to provide a comprehensive setup for a Linux environment with essential security best practices, such as the using of UFW, Fail2Ban, and Ansible community security roles for VM hardening. Security provisioning for different Linux distributions should be handled separately using distinct Ansible roles and playbooks
 
