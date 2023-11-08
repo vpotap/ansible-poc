@@ -1,0 +1,25 @@
+---
+- name: MongoDB Setup
+  hosts: vagrant_group
+  become: yes
+  gather_facts: yes
+  vars_files:
+    - vars/main.yml
+
+    
+
+  roles:
+    - name: community.mongodb.mongodb_linux
+    - name: community.mongodb.mongodb_repository
+    - name: community.mongodb.mongodb_install
+    - name: community.mongodb.mongodb_mongod
+    - name: community.mongodb.mongodb_auth
+
+  tasks:
+    - name: Restart MongoDB
+      systemd:
+        name: mongod
+        state: restarted
+      tags:
+        - create_database
+        - create_user

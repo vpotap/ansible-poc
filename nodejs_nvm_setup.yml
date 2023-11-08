@@ -1,0 +1,23 @@
+---
+- name: Node.js setup with npm support
+  hosts: vagrant_group
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - name: morgangraphics.ansible_role_nvm
+      vars:
+        nvm_profile: "/home/{{ app_user }}/.bashrc"
+        nvm_commands:
+          - "nvm alias default {{ nodejs_version }}"
+          - "whoami"
+          - "node --version"
+          - "nvm --version"
+          - "npm --version"
+      become: yes
+      become_user: vagrant
+
+  tasks:
+    - name: Debugging Output
+      debug:
+        msg: "Current working directory is {{ ansible_env.PWD }} and home directory is {{ ansible_env.HOME }}"

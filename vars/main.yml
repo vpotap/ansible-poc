@@ -1,0 +1,22 @@
+#---- Nginx vars ----#
+nginx_configs_dir: /etc/nginx/sites-available
+nginx_site_enabled_dir: /etc/nginx/sites-enabled
+    
+domain: "{{ app_domain }}"
+domain_ssl: false                                 # disable ssl for domain
+domain_ssl_cert: /path/to/ssl/{{ app_domain }}.crt # use if domain_ssl == true
+domain_ssl_key: /path/to/ssl/{{ app_domain }}.key  # use if domain_ssl == true
+
+#----- MongoDB vars -----#
+# docs: https://github.com/ansible-collections/community.mongodb/tree/master/roles/mongodb_auth
+mongodb_version: "6.0"
+mongodb_admin_pwd: "{{ database_admin_pass }}"
+replicaset: false
+mongodb_users: # (optional) If you want to add multiple regular users
+  - user: "{{ database_user }}"
+    pwd: "{{ database_user_pass }}"
+    db: "{{ database }}"
+
+#----- Node.js ------ #
+nodejs_version: "16.x"
+

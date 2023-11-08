@@ -1,0 +1,45 @@
+---
+- name: General server setup
+  hosts: vagrant_group
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: update APT cache and upgrade all packages
+      apt:
+        update_cache: yes
+        upgrade: safe
+
+    - name: add the ubuntu-security-proposed PPA for Ubuntu 18.04
+      apt_repository:
+        repo: ppa:ubuntu-security-proposed/ppa
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_version == '18.04'
+
+    - name: install or update OpenSSL
+      apt:
+        name: openssl
+        state: latest
+
+    - name: install pip3 for Python
+      ansible.builtin.package:
+        name: python3-pip
+        state: present
+      when: ansible_pkg_mgr in ['apt', 'yum']
+
+    - name: install pymongo using pip3
+      ansible.builtin.pip:
+        name: pymongo
+        state: present
+      
+    - name: install Midnight Commander (mc)
+      apt:
+        name: mc
+        state: present
+
+    - name: install Acl
+      apt:
+        name: acl
+        state: present    
+

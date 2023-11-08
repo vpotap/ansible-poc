@@ -1,0 +1,36 @@
+---
+- name: Install ESM Repo and Update Debian/Ubuntu
+  hosts: vagrant
+  become: yes
+  tasks:
+    - name: Install the ESM Repository Key
+      apt_key:
+        url: http://archive.canonical.com/ubuntu/project/ubuntu-archive-keyring.gpg
+        state: present
+      when: "ansible_distribution == 'Ubuntu'"
+
+    - name: Add ESM Repository (Ubuntu)
+      apt_repository:
+        repo: 'deb http://archive.ubuntu.com/ubuntu {{ ansible_distribution_release }}-security main universe'
+        state: present
+      when: "ansible_distribution == 'Ubuntu'"
+
+    - name: Add ESM Repository (Debian)
+      apt_repository:
+        repo: 'deb http://deb.debian.org/debian-security {{ ansible_distribution_release }}/updates main'
+        state: present
+      when: "ansible_distribution == 'Debian'"
+
+    - name: Update APT Cache
+      apt:
+        update_cache: yes
+
+    - name: Upgrade Packages
+      apt:
+        upgrade: full
+        update_cache: yes
+
+  handlers:
+    - name: Reboot if required
+      reboot:
+        when: ansible_reboot_required

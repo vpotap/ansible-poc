@@ -1,0 +1,20 @@
+- name: Main setup installation
+  hosts: vagrant_group
+  gather_facts: true
+
+  tasks:
+    - name: Get start timestamp
+      command: date +%s
+      register: start_time
+      changed_when: false
+
+    - name: Debug distribution and version
+      debug:
+       var:  start_time, ansible_distribution, ansible_distribution_version    
+
+- import_playbook: server_setup.yml
+- import_playbook: nginx_setup.yml
+- import_playbook: mongodb_setup.yml
+- import_playbook: nodejs_setup.yml
+- import_playbook: pm2_setup.yml
+- import_playbook: app_deploy_setup.yml

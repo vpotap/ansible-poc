@@ -1,0 +1,21 @@
+- name: Install Nginx and manage SSL certificates
+  hosts: vagrant
+  become: yes
+   
+  tasks:
+    - name: Include nginxinc.nginx role
+      import_role:
+        name: nginxinc.nginx
+      
+    - name: Include geerlingguy.certbot role
+      import_role:
+        name: geerlingguy.certbot
+      vars:
+        certbot_auto_renew_user: root
+        certbot_auto_renew_minute: 20
+        certbot_auto_renew_hour: 5
+       
+      tags:
+        - certbot
+
+    

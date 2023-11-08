@@ -1,0 +1,35 @@
+---
+- name: pm2 setup
+  hosts: vagrant_group
+  become: yes
+  gather_facts: yes
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+    # https://pm2.keymetrics.io/docs/usage/startup/
+
+    - name: check if pm2 exist
+      stat:
+        path: /usr/bin/pm2
+      register: pm2_exists
+
+    - name: install pm2
+      npm:
+        name: pm2
+        global: yes
+      when: not pm2_exists.stat.exists
+      register: install_result
+      until: install_result is success
+      retries: 3
+      delay: 2
+
+    - name: configure pm2 as a service
+      shell: "env PATH=$PATH:/usr/bin pm2 startup systemd -u {{ app_user }} --hp /home/{{ app_user }}" 
+  
+   
+
+  
+
+
+  

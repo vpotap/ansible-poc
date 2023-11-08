@@ -1,0 +1,16 @@
+---
+- name: Node.js setup
+  hosts: vagrant_group
+  become: yes
+  gather_facts: yes
+
+  vars_files:
+    - vars/main.yml
+
+  roles:
+    - name: geerlingguy.nodejs
+     
+  tasks:
+    - name: Debugging Output
+      debug:
+        msg: "Current working directory is {{ ansible_env.PWD }} and home directory is {{ ansible_env.HOME }}"

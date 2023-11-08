@@ -1,0 +1,77 @@
+---
+- name: Nginx setup
+  hosts: vagrant_group
+  become: yes
+  gather_facts: yes
+
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+    - name: install nginx 
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - nginx
+      
+    - name: ensure nginx service is enabled and started
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: copy SSL certificate and key files
+      copy:
+        src:  "{{ domain_ssl_cert }}"
+        dest: /etc/nginx/ssl/{{ app_domain }}.crt
+        mode: 0644
+      notify:
+        - Restart Nginx
+      when: domain_ssl  
+
+    - name: copy SSL private key
+      copy:
+        src:  "{{ domain_ssl_key }}"
+        dest: /etc/nginx/ssl/{{ app_domain }}.key
+        mode: 0600
+      notify:
+        - Restart Nginx   
+      when: domain_ssl   
+
+    - name: create nginx configuration file with ssl certificates
+      template:
+        src: templates/nginx.ssl.conf.j2
+        dest: "{{ nginx_configs_dir }}/{{ domain }}"
+      notify:
+        - Reload Nginx
+      when: domain_ssl
+
+    - name: create nginx configuration
+      template:
+        src: templates/nginx.conf.j2
+        dest: "{{ nginx_configs_dir }}/{{ domain }}"
+      notify:
+        - Reload Nginx
+      when: domain_ssl == false
+
+    - name: create a symbolic link to enable the site
+      file:
+        src: "{{ nginx_configs_dir }}/{{ domain }}"
+        dest: "{{ nginx_site_enabled_dir }}/{{ domain }}"
+        state: link
+      notify:
+        - Reload Nginx
+
+    - name: remove the default Nginx configuration
+      file:
+        path: "{{ nginx_site_enabled_dir }}/default"
+        state: absent
+      notify:
+        - Reload Nginx
+
+  handlers:
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded

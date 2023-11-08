@@ -1,0 +1,18 @@
+
+app_domain: hw.local
+app_user: web
+app_user_pass: web # (optional) for testing only 
+app_user_home: /home/{{ app_user }}
+app_user_key_path: ~/.ssh/app_user_key.pub  # path to your local public key (optional)
+app_name: hushnote 
+
+database_host: 127.0.0.1
+database: hushnote
+database_user: dbuser
+database_user_pass: dbpass
+database_admin_pass: adminpass
+
+version: 4.0.0
+app_src_url: "https://github.com/joshterrill/hushnote/archive/refs/tags/{{ version }}.tar.gz"
+app_dir: "/var/www/{{ app_name }}"
+app_dir_version: "{{ app_dir }}/{{ app_name }}-{{ version }}"

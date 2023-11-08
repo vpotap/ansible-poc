@@ -1,0 +1,113 @@
+---
+- name: Create app user with ssh key, download app, restart pm2
+  hosts: vagrant_group
+  become: yes
+  gather_facts: yes
+
+  vars_files:
+    - vars/main.yml 
+
+  tasks:
+    - name: ensure SSH public key exists locally
+      stat:
+        path: "{{ app_user_key_path }}"
+      register: ssh_key_check
+
+    - name: create app user 
+      user:
+        name: "{{ app_user }}"
+        home: "{{ app_user_home }}"
+        shell: /bin/bash
+        createhome: yes
+        state: present
+
+    - name: set user's password
+      command: chpasswd
+      args:
+        stdin: "{{ app_user }}:{{ app_user_pass }}"  
+
+    - name: create .ssh directory in the user's home
+      file:
+        path: "{{ app_user_home }}/.ssh"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0700'
+      when: ssh_key_check.stat.exists
+
+    - name: copy SSH public key to app user's authorized_keys
+      authorized_key:
+        user: "{{ app_user }}"
+        key: "{{ lookup('file', app_user_key_path) }}"
+        state: present
+      when: ssh_key_check.stat.exists
+
+    - name: create {{ app_dir }} directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0755"
+      
+    - name: download {{ app_src_url }} HushNote release
+      unarchive:
+        src: "{{ app_src_url }}"
+        dest: "{{ app_dir }}"
+        creates: "{{ app_dir_version }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        remote_src: yes
+      register: release_download  
+       
+    - name: copy app .env file to hushnote {{ app_dir_version }} 
+      template:
+        src: templates/app.env.j2
+        dest: "{{ app_dir_version }}/.env"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+          
+    - name: run npm install in the {{ app_dir_version }}  directory
+      command: npm install
+      args:
+        chdir: "{{ app_dir_version }}"  
+      register: npm_install_result
+      ignore_errors: yes
+      when: release_download.changed
+
+    - name: create link {{ app_dir_version }}/current"
+      file:
+        src: "{{ app_dir_version }}"
+        dest: "{{ app_dir }}/current"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        state: link
+        follow: False
+      when: npm_install_result is succeeded
+
+    - name: stop node app with pm2 if exist
+      command: pm2 delete {{ app_user }}  
+      become_user: "{{ app_user }}"
+      ignore_errors: True
+
+    - name: start node app with pm2
+      command: pm2 start index.js -f --name {{ app_user }} chdir={{ app_dir }}/current
+      become_user: "{{ app_user }}"
+
+    - name: "flush logs"
+      command: "pm2 flush"  
+      become_user: "{{ app_user }}"
+
+    - name: check application status
+      uri:
+        url: "http://127.0.0.1:3000"
+        status_code: 200
+      register: result
+      ignore_errors: yes
+      until: result.status == 200
+      retries: 5
+      delay: 5
+
+    - name: display result
+      debug:
+        msg: "Application is {{ 'running' if result.status == 200 else 'not running' }}"
